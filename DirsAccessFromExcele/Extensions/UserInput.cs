@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DirsAccessFromExcele.Extensions
+namespace DirsAccessFromExcel.Extensions
 {
     public static class UserInput
     {

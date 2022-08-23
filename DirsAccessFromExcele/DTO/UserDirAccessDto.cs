@@ -1,11 +1,11 @@
-﻿using DirsAccessFromExcele.Logic;
+﻿using DirsAccessFromExcel.Logic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DirsAccessFromExcele.DTO
+namespace DirsAccessFromExcel.DTO
 {
     public class UserDirAccessDto
     {
@@ -15,17 +15,11 @@ namespace DirsAccessFromExcele.DTO
 
         public UserAccessRule Access { get; private set; }
 
-        public bool IsDeepAccess { get; private set; }
-
-        public UserDirAccessDto(string DirPath, string UserName, UserAccessRule Access, bool isDeepAccess = false)
+        public UserDirAccessDto(string DirPath, string UserName, UserAccessRule Access)
         {
             this.DirPath = DirPath;
             this.UserName = UserName;
             this.Access = Access;
-            if (Access != UserAccessRule.Disable)
-            {
-                IsDeepAccess = isDeepAccess;
-            }
         }
     }
 }

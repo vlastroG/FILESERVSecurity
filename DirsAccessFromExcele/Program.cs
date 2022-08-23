@@ -1,6 +1,7 @@
-﻿using DirsAccessFromExcele.DTO;
-using DirsAccessFromExcele.Extensions;
-using DirsAccessFromExcele.Logic;
+﻿using DirsAccessFromExcel.DTO;
+using DirsAccessFromExcel.Extensions;
+using DirsAccessFromExcel.Logic;
+using DirsAccessFromExcel.WorkWithExcel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,21 +21,29 @@ namespace DirsAccessFromExcel
 
         public static void Execute()
         {
+            Excel excel = new Excel(@"ExcelSample\ПраваДоступаОбразец.xlsx");
             try
             {
-                string DirectoryName = @"C:\Users\stroganov.vg\Documents\TestAccess_deleteIfYouWant";
-                string username = @"PGS.ru\koval.mi";
-                string rootDir = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта, например \'Q:\\Проекты\\003-2022-ПИР\'").TrimStart().TrimEnd();
-                Console.WriteLine("Test begun");
+                string rootDir = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта,\n" +
+                    "например: \'Q:\\Проекты\\003-2022-ПИР\\\' и нажмите Enter").TrimStart().TrimEnd();
+                Console.WriteLine();
+                string excelPath = UserInput.GetStringFromUser(
+                    $"Введите полный путь к excel файлу с правами доступа для {rootDir},\n" +
+                    $"например: C:\\Users\\ПраваДоступаОбразец.xlsx");
+                Console.WriteLine();
+                excel = new Excel(excelPath);
+                excel.SetAccRulesToDirs(rootDir);
+                excel.Dispose();
 
-                UserDirAccessDto dto = new UserDirAccessDto(DirectoryName, username, UserAccessRule.Disable, true);
-                AccessSettter.SetDirAccessForUser(dto);
-
-                Console.WriteLine("Done.");
+                Console.WriteLine("Готово, нажмите Enter");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+            finally
+            {
+                excel.Dispose();
             }
 
             Console.ReadLine();
