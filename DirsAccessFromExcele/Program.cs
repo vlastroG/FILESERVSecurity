@@ -1,4 +1,7 @@
-﻿using System;
+﻿using DirsAccessFromExcele.DTO;
+using DirsAccessFromExcele.Extensions;
+using DirsAccessFromExcele.Logic;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,18 +23,12 @@ namespace DirsAccessFromExcel
             try
             {
                 string DirectoryName = @"C:\Users\stroganov.vg\Documents\TestAccess_deleteIfYouWant";
+                string username = @"PGS.ru\koval.mi";
+                string rootDir = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта, например \'Q:\\Проекты\\003-2022-ПИР\'").TrimStart().TrimEnd();
+                Console.WriteLine("Test begun");
 
-                Console.WriteLine("Adding access control entry for " + DirectoryName);
-
-                // Add the access control entry to the directory.
-                AddDirectorySecurity(DirectoryName, @"PGS.ru\koval.mi", FileSystemRights.Read, AccessControlType.Allow);
-                AddDirectorySecurity(DirectoryName, @"PGS.ru\koval.mi", FileSystemRights.ReadAndExecute, AccessControlType.Allow);
-                AddDirectorySecurity(DirectoryName, @"PGS.ru\koval.mi", FileSystemRights.ListDirectory, AccessControlType.Allow);
-
-                //Console.WriteLine("Removing access control entry from " + DirectoryName);
-
-                // Remove the access control entry from the directory.
-                //RemoveDirectorySecurity(DirectoryName, @"MYDOMAIN\MyAccount", FileSystemRights.Read, AccessControlType.Allow);
+                UserDirAccessDto dto = new UserDirAccessDto(DirectoryName, username, UserAccessRule.Disable, true);
+                AccessSettter.SetDirAccessForUser(dto);
 
                 Console.WriteLine("Done.");
             }
@@ -40,43 +37,7 @@ namespace DirsAccessFromExcel
                 Console.WriteLine(e);
             }
 
-            // Console.ReadLine();
-        }
-
-        // Adds an ACL entry on the specified directory for the specified account.
-        public static void AddDirectorySecurity(string FileName, string Account, FileSystemRights Rights, AccessControlType ControlType)
-        {
-            DirectoryInfo dInfo = new DirectoryInfo(FileName);
-
-            DirectorySecurity dSecurity = dInfo.GetAccessControl();
-
-            dSecurity.AddAccessRule(new FileSystemAccessRule(Account,
-                                                            Rights,
-                                                            ControlType)); // первое назначение
-            dSecurity.AddAccessRule(new FileSystemAccessRule(Account,
-                                                            Rights,
-                                                            InheritanceFlags.ContainerInherit |
-                                                            InheritanceFlags.ObjectInherit,
-                                                            PropagationFlags.InheritOnly,
-                                                            ControlType)); // второе назначение
-            // Если применять только для этой папки, то только первое назначение.
-            // Если применять для этой папки, ее подпапок и файлов, то нужны и первое и второе назначения.
-
-            dInfo.SetAccessControl(dSecurity);
-        }
-
-        // Removes an ACL entry on the specified directory for the specified account.
-        public static void RemoveDirectorySecurity(string FileName, string Account, FileSystemRights Rights, AccessControlType ControlType)
-        {
-            DirectoryInfo dInfo = new DirectoryInfo(FileName);
-
-            DirectorySecurity dSecurity = dInfo.GetAccessControl();
-
-            dSecurity.RemoveAccessRule(new FileSystemAccessRule(Account,
-                                                            Rights,
-                                                            ControlType));
-
-            dInfo.SetAccessControl(dSecurity);
+            Console.ReadLine();
         }
     }
 }
