@@ -21,7 +21,7 @@ namespace DirsAccessFromExcel
 
         public static void Execute()
         {
-            Excel excel = new Excel(@"ExcelSample\ПраваДоступаОбразец.xlsx");
+            Excel excel = new Excel(@"C:\Users\stroganov.vg\source\repos\FILESERVSecurity\DirsAccessFromExcele\bin\Debug\ExcelSample\ПраваДоступаОбразец.xlsx");
             try
             {
                 string rootDir = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта,\n" +
@@ -33,7 +33,7 @@ namespace DirsAccessFromExcel
                 Console.WriteLine();
                 excel = new Excel(excelPath);
                 excel.SetAccRulesToDirs(rootDir);
-                excel.Dispose();
+                //excel.Dispose();
 
                 Console.WriteLine("Готово, нажмите Enter");
             }

@@ -126,24 +126,8 @@ namespace DirsAccessFromExcel.WorkWithExcel
 
         public void Dispose()
         {
-            //cleanup
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            //rule of thumb for releasing com objects:
-            //  never use two dots, all COM objects must be referenced and released individually
-            //  ex: [somthing].[something].[something] is bad
-
-            //release com objects to fully kill excel process from running in the background
-            Marshal.ReleaseComObject(ws);
-
-            //close and release
-            wb.Close();
-            Marshal.ReleaseComObject(wb);
-
-            //quit and release
+            wb.Close(0);
             excel.Quit();
-            Marshal.ReleaseComObject(excel);
         }
     }
 }
