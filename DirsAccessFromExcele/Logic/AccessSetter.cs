@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DirsAccessFromExcel.Logic
@@ -22,7 +24,7 @@ namespace DirsAccessFromExcel.Logic
         /// <summary>
         /// Доступ на чтение текущей папки, ее подпапок и файлов
         /// </summary>
-        ReedDeep,
+        ReadDeep,
         /// <summary>
         /// Доступ на редактирование текущей папки, ее подпапок и файлов
         /// </summary>
@@ -33,21 +35,21 @@ namespace DirsAccessFromExcel.Logic
         Disable
     }
 
-    public static class AccessSettter
+    public static class AccessSetter
     {
         public static void SetDirAccessForUser(UserDirAccessDto userDirAccess)
         {
             try
             {
                 UserAccessRule rule = userDirAccess.Access;
-                Console.Write($"Назначение '{userDirAccess.Access}' доступа для {userDirAccess.UserName} к {userDirAccess.DirPath}");
+                Console.WriteLine($"Назначение '{userDirAccess.Access}' доступа для {userDirAccess.UserName} к {userDirAccess.DirPath}");
 
                 switch (rule)
                 {
                     case UserAccessRule.Read:
                         SetReadRules(userDirAccess.DirPath, userDirAccess.UserName, false);
                         break;
-                    case UserAccessRule.ReedDeep:
+                    case UserAccessRule.ReadDeep:
                         SetReadRules(userDirAccess.DirPath, userDirAccess.UserName, true);
                         break;
                     case UserAccessRule.Write:
@@ -57,9 +59,10 @@ namespace DirsAccessFromExcel.Logic
                         RemoveAccess(userDirAccess.DirPath, userDirAccess.UserName);
                         break;
                 }
-
-
-                ConsoleExtensions.ClearCurrentConsoleLine();
+            }
+            catch (IdentityNotMappedException)
+            {
+                Console.WriteLine($"Ошибка: имя пользователя {userDirAccess.UserName} некорректно !");
             }
             catch (Exception e)
             {
@@ -97,6 +100,30 @@ namespace DirsAccessFromExcel.Logic
             RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Write, isDeepAccess);
         }
 
+        private static void DirectoryNotExistMessage(string DirPath)
+        {
+            Console.WriteLine($"Ошибка: папки {DirPath} не существует !");
+        }
+
+        /// <summary>
+        /// Возвращает массив имен пользователей из ячейки. В массив попадают только валидные имена.
+        /// </summary>
+        /// <param name="s">Строковое значение ячейки</param>
+        /// <returns>Массив имен пользователей</returns>
+        public static string[] GetUsernamesFromString(string s)
+        {
+            Regex regex = new Regex(@"[a-z]+[.][a-z]{2}$");
+            var usersRaw = s.Split(';');
+            List<string> users = new List<string>();
+            foreach (var user in usersRaw)
+            {
+                var u = user.StartsWith("\n") ? user.Remove(0, 1) : user;
+                if (regex.IsMatch(u))
+                    users.Add(u);
+            }
+            return users.ToArray();
+        }
+
         private static void AddDirectorySecurity(
             string DirPath,
             string UserName,
@@ -104,6 +131,11 @@ namespace DirsAccessFromExcel.Logic
             bool isDeepAccess)
         {
             DirectoryInfo dInfo = new DirectoryInfo(DirPath);
+            if (!dInfo.Exists)
+            {
+                DirectoryNotExistMessage(DirPath);
+                return;
+            }
 
             DirectorySecurity dSecurity = dInfo.GetAccessControl();
 
@@ -129,6 +161,11 @@ namespace DirsAccessFromExcel.Logic
         private static void RemoveDirectorySecurity(string DirPath, string UserName, FileSystemRights Rights, bool isDeepAccess)
         {
             DirectoryInfo dInfo = new DirectoryInfo(DirPath);
+            if (!dInfo.Exists)
+            {
+                DirectoryNotExistMessage(DirPath);
+                return;
+            }
 
             DirectorySecurity dSecurity = dInfo.GetAccessControl();
 
@@ -165,9 +202,31 @@ namespace DirsAccessFromExcel.Logic
                 case "Ч":
                     return UserAccessRule.Read;
                 case "Ч!":
-                    return UserAccessRule.ReedDeep;
+                    return UserAccessRule.ReadDeep;
                 default:
                     return UserAccessRule.Disable;
+            }
+        }
+
+        /// <summary>
+        /// Обнулить доступ для пользователя к проекту
+        /// </summary>
+        /// <param name="root">Корневая папка проекта</param>
+        /// <param name="userNameRaw">Имя пользователя</param>
+        public static void RemoveUserAccess(DirectoryInfo root, string userNameRaw)
+        {
+            string user = GetUsernamesFromString(userNameRaw).FirstOrDefault();
+            if (root.Exists)
+            {
+                string[] subDirs = root.GetSubDirsRecursively().Reverse().ToArray();
+                for (int i = 0; i < subDirs.Length; i++)
+                {
+                    SetDirAccessForUser(new UserDirAccessDto(subDirs[i], user, UserAccessRule.Disable));
+                }
+            }
+            else
+            {
+                DirectoryNotExistMessage(root.FullName);
             }
         }
     }

@@ -13,7 +13,7 @@ using _Excel = Microsoft.Office.Interop.Excel;
 
 namespace DirsAccessFromExcel.WorkWithExcel
 {
-    public class Excel:IDisposable
+    public class Excel : IDisposable
     {
         public string Path { get; private set; }
         private readonly _Application excel = new _Excel.Application();
@@ -55,7 +55,7 @@ namespace DirsAccessFromExcel.WorkWithExcel
             var cellValue = ReadCell(row, column);
             while (cellValue != String.Empty)
             {
-                string[] usersInCell = GetUsernamesFromCell(cellValue);
+                string[] usersInCell = AccessSetter.GetUsernamesFromString(cellValue);
                 foreach (string user in usersInCell)
                 {
                     users.Add(new UsernameDto(user, column));
@@ -64,25 +64,6 @@ namespace DirsAccessFromExcel.WorkWithExcel
                 cellValue = ReadCell(row, column);
             }
             Users = users.ToArray();
-        }
-
-        /// <summary>
-        /// Возвращает массив имен пользователей из ячейки. В массив попадают только валидные имена.
-        /// </summary>
-        /// <param name="s">Строковое значение ячейки</param>
-        /// <returns>Массив имен пользователей</returns>
-        private string[] GetUsernamesFromCell(string s)
-        {
-            Regex regex = new Regex(@"[a-z]+[.][a-z]{2}$");
-            var usersRaw = s.Split(';');
-            List<string> users = new List<string>();
-            foreach (var user in usersRaw)
-            {
-                var u = user.StartsWith("\n") ? user.Remove(0, 1) : user;
-                if (regex.IsMatch(u))
-                    users.Add(u);
-            }
-            return users.ToArray();
         }
 
         private void FillRulesList(string @rootDir)
@@ -101,7 +82,7 @@ namespace DirsAccessFromExcel.WorkWithExcel
                     if (path != String.Empty && accRule != string.Empty)
                     {
                         path = rootDir + path;
-                        var rule = AccessSettter.GetAccessRule(accRule);
+                        var rule = AccessSetter.GetAccessRule(accRule);
                         userAccRules.Add(new UserDirAccessDto(path, user.Name, rule));
                     }
                     row++;
@@ -119,8 +100,9 @@ namespace DirsAccessFromExcel.WorkWithExcel
             {
                 for (int i = 0; i < accListForUser.Count; i++)
                 {
-                    AccessSettter.SetDirAccessForUser(accListForUser[i]);
+                    AccessSetter.SetDirAccessForUser(accListForUser[i]);
                 }
+                Console.WriteLine();
             }
         }
 

@@ -16,12 +16,53 @@ namespace DirsAccessFromExcel
     {
         static void Main(string[] args)
         {
-            Execute();
+            var input = GetAction();
+            while (input != "выход")
+            {
+                switch (input)
+                {
+                    case "назначить":
+                        SetAccessByExcel();
+                        Console.WriteLine("Готово, нажмите Enter");
+                        Console.ReadLine();
+                        Console.Clear();
+                        break;
+                    case "обнулить":
+                        DisableAccessForUser();
+                        Console.WriteLine("Готово, нажмите Enter");
+                        Console.ReadLine();
+                        Console.Clear();
+                        break;
+                    default:
+                        Console.Clear();
+                        break;
+                }
+                input = GetAction();
+            }
         }
 
-        public static void Execute()
+        private static string GetAction()
         {
-            Excel excel = new Excel(@"C:\Users\stroganov.vg\source\repos\FILESERVSecurity\DirsAccessFromExcele\bin\Debug\ExcelSample\ПраваДоступаОбразец.xlsx");
+            return UserInput.GetStringFromUser(
+                "Если вы хотите назначить права доступа к папкам проекта введите \'назначить\';" +
+                "\nесли вы хотите обнулить доступ для пользователя к папкам проекта введите \'обнулить\';" +
+                "\nдля выхода введите \'выход\'." +
+                "\nРегистр не важен.").TrimStart().TrimEnd().ToLower();
+        }
+
+        public static void DisableAccessForUser()
+        {
+            string userRaw = UserInput.GetStringFromUser("Введите имя пользователя для запрета доступа," +
+                " например \'ivanov.ii\'").TrimStart().TrimEnd();
+            string path = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта,\n" +
+                    "например: \'Q:\\Проекты\\003-2022-ПИР\' и нажмите Enter").TrimStart().TrimEnd();
+            DirectoryInfo dir = new DirectoryInfo(path);
+            AccessSetter.RemoveUserAccess(dir, userRaw);
+        }
+
+        public static void SetAccessByExcel()
+        {
+            Excel excel = new Excel($"{AppDomain.CurrentDomain.BaseDirectory}ExcelSample\\ПраваДоступаОбразец.xlsx");
             try
             {
                 string rootDir = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта,\n" +
@@ -33,9 +74,6 @@ namespace DirsAccessFromExcel
                 Console.WriteLine();
                 excel = new Excel(excelPath);
                 excel.SetAccRulesToDirs(rootDir);
-                //excel.Dispose();
-
-                Console.WriteLine("Готово, нажмите Enter");
             }
             catch (Exception e)
             {
@@ -45,8 +83,6 @@ namespace DirsAccessFromExcel
             {
                 excel.Dispose();
             }
-
-            Console.ReadLine();
         }
     }
 }
