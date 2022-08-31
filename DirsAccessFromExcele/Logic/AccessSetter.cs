@@ -34,7 +34,7 @@ namespace DirsAccessFromExcel.Logic
 
     public static class AccessSetter
     {
-        public static void SetDirAccessForUser(UserDirAccessDto userDirAccess)
+        public static bool SetDirAccessForUser(UserDirAccessDto userDirAccess)
         {
             try
             {
@@ -44,57 +44,58 @@ namespace DirsAccessFromExcel.Logic
                 switch (rule)
                 {
                     case UserAccessRule.Read:
-                        SetReadRules(userDirAccess.DirPath, userDirAccess.UserName, false);
-                        break;
+                        return SetReadRules(userDirAccess.DirPath, userDirAccess.UserName, false);
                     case UserAccessRule.ReadDeep:
-                        SetReadRules(userDirAccess.DirPath, userDirAccess.UserName, true);
-                        break;
+                        return SetReadRules(userDirAccess.DirPath, userDirAccess.UserName, true);
                     case UserAccessRule.Write:
-                        SetWriteRules(userDirAccess.DirPath, userDirAccess.UserName);
-                        break;
+                        return SetWriteRules(userDirAccess.DirPath, userDirAccess.UserName);
                     case UserAccessRule.Disable:
-                        RemoveAccess(userDirAccess.DirPath, userDirAccess.UserName);
-                        break;
+                        return RemoveAccess(userDirAccess.DirPath, userDirAccess.UserName);
+                    default:
+                        return false;
                 }
             }
             catch (IdentityNotMappedException)
             {
                 Console.WriteLine($"Ошибка: имя пользователя {userDirAccess.UserName} некорректно !");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
+                return false;
             }
         }
 
-        private static void RemoveAccess(string DirPath, string @UserName)
+        private static bool RemoveAccess(string DirPath, string @UserName)
         {
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.FullControl, true);
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Modify, true);
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.ReadAndExecute, true);
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.ListDirectory, true);
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Read, true);
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Write, true);
+            bool result = true;
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.FullControl, true);
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Modify, true);
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.ReadAndExecute, true);
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.ListDirectory, true);
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Read, true);
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Write, true);
+            return result;
         }
 
-        private static void SetWriteRules(string DirPath, string @UserName)
+        private static bool SetWriteRules(string DirPath, string @UserName)
         {
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.FullControl, true);
-            AddDirectorySecurity(DirPath, @UserName, FileSystemRights.Modify, true);
-            AddDirectorySecurity(DirPath, @UserName, FileSystemRights.ReadAndExecute, true);
-            AddDirectorySecurity(DirPath, @UserName, FileSystemRights.ListDirectory, true);
-            AddDirectorySecurity(DirPath, @UserName, FileSystemRights.Read, true);
-            AddDirectorySecurity(DirPath, @UserName, FileSystemRights.Write, true);
+            bool result = true;
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.FullControl, true);
+            result &= AddDirectorySecurity(DirPath, @UserName, FileSystemRights.Modify, true);
+            result &= AddDirectorySecurity(DirPath, @UserName, FileSystemRights.ReadAndExecute, true);
+            result &= AddDirectorySecurity(DirPath, @UserName, FileSystemRights.ListDirectory, true);
+            result &= AddDirectorySecurity(DirPath, @UserName, FileSystemRights.Read, true);
+            result &= AddDirectorySecurity(DirPath, @UserName, FileSystemRights.Write, true);
+            return result;
         }
 
-        private static void SetReadRules(string DirPath, string @UserName, bool isDeepAccess)
+        private static bool SetReadRules(string DirPath, string @UserName, bool isDeepAccess)
         {
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.FullControl, isDeepAccess);
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Modify, isDeepAccess);
-            AddDirectorySecurity(DirPath, @UserName, FileSystemRights.ReadAndExecute, isDeepAccess);
-            AddDirectorySecurity(DirPath, @UserName, FileSystemRights.ListDirectory, isDeepAccess);
-            AddDirectorySecurity(DirPath, @UserName, FileSystemRights.Read, isDeepAccess);
-            RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Write, isDeepAccess);
+            bool result = true;
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.FullControl, isDeepAccess);
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Modify, isDeepAccess);
+            result &= AddDirectorySecurity(DirPath, @UserName, FileSystemRights.ReadAndExecute, isDeepAccess);
+            result &= AddDirectorySecurity(DirPath, @UserName, FileSystemRights.ListDirectory, isDeepAccess);
+            result &= AddDirectorySecurity(DirPath, @UserName, FileSystemRights.Read, isDeepAccess);
+            result &= RemoveDirectorySecurity(DirPath, @UserName, FileSystemRights.Write, isDeepAccess);
+            return result;
         }
 
         private static void DirectoryNotExistMessage(string DirPath)
@@ -121,7 +122,7 @@ namespace DirsAccessFromExcel.Logic
             return users.ToArray();
         }
 
-        private static void AddDirectorySecurity(
+        private static bool AddDirectorySecurity(
             string DirPath,
             string UserName,
             FileSystemRights Rights,
@@ -131,7 +132,7 @@ namespace DirsAccessFromExcel.Logic
             if (!dInfo.Exists)
             {
                 DirectoryNotExistMessage(DirPath);
-                return;
+                return false;
             }
 
             DirectorySecurity dSecurity = dInfo.GetAccessControl();
@@ -152,16 +153,17 @@ namespace DirsAccessFromExcel.Logic
             }
 
             dInfo.SetAccessControl(dSecurity);
+            return true;
         }
 
         // Removes an ACL entry on the specified directory for the specified account.
-        private static void RemoveDirectorySecurity(string DirPath, string UserName, FileSystemRights Rights, bool isDeepAccess)
+        private static bool RemoveDirectorySecurity(string DirPath, string UserName, FileSystemRights Rights, bool isDeepAccess)
         {
             DirectoryInfo dInfo = new DirectoryInfo(DirPath);
             if (!dInfo.Exists)
             {
                 DirectoryNotExistMessage(DirPath);
-                return;
+                return false;
             }
 
             DirectorySecurity dSecurity = dInfo.GetAccessControl();
@@ -180,6 +182,7 @@ namespace DirsAccessFromExcel.Logic
             }
 
             dInfo.SetAccessControl(dSecurity);
+            return true;
         }
 
         /// <summary>
@@ -210,20 +213,23 @@ namespace DirsAccessFromExcel.Logic
         /// </summary>
         /// <param name="root">Корневая папка проекта</param>
         /// <param name="userNameRaw">Имя пользователя</param>
-        public static void RemoveUserAccess(DirectoryInfo root, string userNameRaw)
+        public static bool RemoveUserAccess(DirectoryInfo root, string userNameRaw)
         {
+            bool result = true;
             string user = GetUsernamesFromString(userNameRaw).FirstOrDefault();
             if (root.Exists)
             {
                 string[] subDirs = root.GetSubDirsRecursively().Reverse().ToArray();
                 for (int i = 0; i < subDirs.Length; i++)
                 {
-                    SetDirAccessForUser(new UserDirAccessDto(subDirs[i], user, UserAccessRule.Disable));
+                    result &= SetDirAccessForUser(new UserDirAccessDto(subDirs[i], user, UserAccessRule.Disable));
                 }
+                return result;
             }
             else
             {
                 DirectoryNotExistMessage(root.FullName);
+                return false;
             }
         }
     }

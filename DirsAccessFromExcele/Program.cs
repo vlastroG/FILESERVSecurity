@@ -16,14 +16,28 @@ namespace DirsAccessFromExcel
                 switch (input)
                 {
                     case "назначить":
-                        SetAccessByExcel();
-                        Console.WriteLine("Готово, нажмите Enter");
+                        var result = SetAccessByExcel();
+                        if (result)
+                        {
+                            Console.WriteLine("Готово, нажмите Enter");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Выполнено с ошибками, нажмите Enter");
+                        }
                         Console.ReadLine();
                         Console.Clear();
                         break;
                     case "обнулить":
-                        DisableAccessForUser();
-                        Console.WriteLine("Готово, нажмите Enter");
+                        result = DisableAccessForUser();
+                        if (result)
+                        {
+                            Console.WriteLine("Готово, нажмите Enter");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Выполнено с ошибками, нажмите Enter");
+                        }
                         Console.ReadLine();
                         Console.Clear();
                         break;
@@ -44,17 +58,17 @@ namespace DirsAccessFromExcel
                 "\nРегистр не важен.").TrimStart().TrimEnd().ToLower();
         }
 
-        public static void DisableAccessForUser()
+        public static bool DisableAccessForUser()
         {
             string userRaw = UserInput.GetStringFromUser("Введите имя пользователя для запрета доступа," +
                 " например \'ivanov.ii\'").TrimStart().TrimEnd();
             string path = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта,\n" +
                     "например: \'Q:\\Проекты\\003-2022-ПИР\' и нажмите Enter").TrimStart().TrimEnd();
             DirectoryInfo dir = new DirectoryInfo(path);
-            AccessSetter.RemoveUserAccess(dir, userRaw);
+            return AccessSetter.RemoveUserAccess(dir, userRaw);
         }
 
-        public static void SetAccessByExcel()
+        public static bool SetAccessByExcel()
         {
             Excel excel = new Excel($"{AppDomain.CurrentDomain.BaseDirectory}ExcelSample\\ПраваДоступаОбразец.xlsx");
             try
@@ -67,11 +81,12 @@ namespace DirsAccessFromExcel
                     $"например: C:\\Users\\ПраваДоступаОбразец.xlsx");
                 Console.WriteLine();
                 excel = new Excel(excelPath);
-                excel.SetAccRulesToDirs(rootDir);
+                return excel.SetAccRulesToDirs(rootDir);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return false;
             }
             finally
             {

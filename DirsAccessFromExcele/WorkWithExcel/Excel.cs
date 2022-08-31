@@ -88,17 +88,19 @@ namespace DirsAccessFromExcel.WorkWithExcel
             }
         }
 
-        public void SetAccRulesToDirs(string @root)
+        public bool SetAccRulesToDirs(string @root)
         {
             FillRulesList(@root);
+            bool result = true;
             foreach (var accListForUser in ListOfUsersAccRules)
             {
                 for (int i = 0; i < accListForUser.Count; i++)
                 {
-                    AccessSetter.SetDirAccessForUser(accListForUser[i]);
+                    result &= AccessSetter.SetDirAccessForUser(accListForUser[i]);
                 }
                 Console.WriteLine();
             }
+            return result;
         }
 
         public void Dispose()
