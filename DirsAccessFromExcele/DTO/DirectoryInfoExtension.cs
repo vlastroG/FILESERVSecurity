@@ -4,6 +4,9 @@ using System.IO;
 
 namespace DirsAccessFromExcel.DTO
 {
+    /// <summary>
+    /// Методы расширения для DirectoryInfo
+    /// </summary>
     public static class DirectoryInfoExtension
     {
         /// <summary>

@@ -9,29 +9,6 @@ using System.Text.RegularExpressions;
 
 namespace DirsAccessFromExcel.Logic
 {
-    /// <summary>
-    /// Перечисление прав доступа к папке
-    /// </summary>
-    public enum UserAccessRule
-    {
-        /// <summary>
-        /// Доступ на чтение только текущей папки
-        /// </summary>
-        Read,
-        /// <summary>
-        /// Доступ на чтение текущей папки, ее подпапок и файлов
-        /// </summary>
-        ReadDeep,
-        /// <summary>
-        /// Доступ на редактирование текущей папки, ее подпапок и файлов
-        /// </summary>
-        Write,
-        /// <summary>
-        /// Доступа нет
-        /// </summary>
-        Disable
-    }
-
     public static class AccessSetter
     {
         public static bool SetDirAccessForUser(UserDirAccessDto userDirAccess)
@@ -39,7 +16,14 @@ namespace DirsAccessFromExcel.Logic
             try
             {
                 UserAccessRule rule = userDirAccess.Access;
-                Console.WriteLine($"Назначение '{userDirAccess.Access}' доступа для {userDirAccess.UserName} к {userDirAccess.DirPath}");
+                if (!Directory.Exists(userDirAccess.DirPath))
+                {
+                    Directory.CreateDirectory(userDirAccess.DirPath);
+                    Console.WriteLine(new string('=', 140));
+                    Console.WriteLine($"=== Create --> {userDirAccess.DirPath,-121} ===", -140);
+                    Console.WriteLine(new string('=', 140));
+                }
+                Console.WriteLine($"\t{userDirAccess.Access,-10}\t{userDirAccess.UserName,-20}\t{userDirAccess.DirPath}");
 
                 switch (rule)
                 {
@@ -104,20 +88,22 @@ namespace DirsAccessFromExcel.Logic
         }
 
         /// <summary>
-        /// Возвращает массив имен пользователей из ячейки. В массив попадают только валидные имена.
+        /// Возвращает массив валидных имен пользователей с доменными префиксами из ячейки.
         /// </summary>
         /// <param name="s">Строковое значение ячейки</param>
-        /// <returns>Массив имен пользователей</returns>
+        /// <returns>Массив имен пользователей с доменным префиксом</returns>
         public static string[] GetUsernamesFromString(string s)
         {
             Regex regex = new Regex(@"[a-z]+[.][a-z]{2}$");
-            var usersRaw = s.Split(';');
+            var usersRaw = s.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             List<string> users = new List<string>();
             foreach (var user in usersRaw)
             {
                 var u = user.StartsWith("\n") ? user.Remove(0, 1) : user;
                 if (regex.IsMatch(u))
-                    users.Add(u);
+                {
+                    users.Add(@"PGS.ru\" + u);
+                }
             }
             return users.ToArray();
         }

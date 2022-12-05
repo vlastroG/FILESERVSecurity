@@ -17,9 +17,16 @@ namespace DirsAccessFromExcel.WorkWithExcel
 
         private UsernameDto[] Users;
 
-        private readonly List<List<UserDirAccessDto>> ListOfUsersAccRules
-            = new List<List<UserDirAccessDto>>();
+        /// <summary>
+        /// Список Dto скомпонованных абсолютных путей к папкам и прав доступа для пользователей к ним
+        /// </summary>
+        private readonly List<UserDirAccessDto> ListOfUsersAccRules
+            = new List<UserDirAccessDto>();
 
+        /// <summary>
+        /// Файл Excel с матрицей прав доступа
+        /// </summary>
+        /// <param name="Path"></param>
         public Excel(string Path)
         {
             this.Path = Path;
@@ -61,44 +68,53 @@ namespace DirsAccessFromExcel.WorkWithExcel
             Users = users.ToArray();
         }
 
+        /// <summary>
+        /// Заполняет сисок <see cref="ListOfUsersAccRules">ListOfUsersAccRules</see>
+        /// </summary>
+        /// <param name="rootDir">Корневая папка проекта</param>
         private void FillRulesList(string @rootDir)
         {
-            FillUsernames();
-            foreach (var user in Users)
+            Console.WriteLine();
+            Console.WriteLine("Подождите, идет обработка матрицы доступа...");
+            int row = 4;
+            int columnDir = 1;
+            int columnUser = 2;
+            string path = ReadCell(row, columnDir);
+            while (!string.IsNullOrEmpty(path))
             {
-                List<UserDirAccessDto> userAccRules = new List<UserDirAccessDto>();
-                var row = 4;
-                var columnNumber = 1;
-                var columnUser = user.ColumnNumber;
-                var path = ReadCell(row, columnNumber);
-                var accRule = ReadCell(row, columnUser);
-                while ((path != String.Empty) || (accRule != String.Empty))
+                string[] users = AccessSetter.GetUsernamesFromString(ReadCell(3, columnUser));
+                while (users.Length > 0)
                 {
-                    if (path != String.Empty && accRule != string.Empty)
+                    string accRule = ReadCell(row, columnUser);
+                    if (!string.IsNullOrEmpty(accRule))
                     {
-                        path = rootDir + path;
                         var rule = AccessSetter.GetAccessRule(accRule);
-                        userAccRules.Add(new UserDirAccessDto(path, user.Name, rule));
+                        foreach (string user in users)
+                        {
+                            ListOfUsersAccRules.Add(new UserDirAccessDto(rootDir + path, user, rule));
+                        }
                     }
-                    row++;
-                    path = ReadCell(row, columnNumber);
-                    accRule = ReadCell(row, columnUser);
+                    columnUser++;
+                    users = AccessSetter.GetUsernamesFromString(ReadCell(3, columnUser));
                 }
-                ListOfUsersAccRules.Add(userAccRules);
+                row++;
+                columnUser = 2;
+                path = ReadCell(row, columnDir);
             }
         }
 
+        /// <summary>
+        /// Назначает права доступа к директориям из <see cref="ListOfUsersAccRules">ListOfUsersAccRules</see>
+        /// </summary>
+        /// <param name="root"></param>
+        /// <returns></returns>
         public bool SetAccRulesToDirs(string @root)
         {
             FillRulesList(@root);
             bool result = true;
             foreach (var accListForUser in ListOfUsersAccRules)
             {
-                for (int i = 0; i < accListForUser.Count; i++)
-                {
-                    result &= AccessSetter.SetDirAccessForUser(accListForUser[i]);
-                }
-                Console.WriteLine();
+                result &= AccessSetter.SetDirAccessForUser(accListForUser);
             }
             return result;
         }

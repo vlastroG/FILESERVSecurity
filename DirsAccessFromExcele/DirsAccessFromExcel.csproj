@@ -49,6 +49,7 @@
     <Compile Include="Extensions\ConsoleExtensions.cs" />
     <Compile Include="Extensions\UserInput.cs" />
     <Compile Include="Logic\AccessSetter.cs" />
+    <Compile Include="Logic\UserAccessRule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkWithExcel\Excel.cs" />

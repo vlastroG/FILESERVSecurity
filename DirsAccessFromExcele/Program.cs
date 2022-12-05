@@ -73,6 +73,7 @@ namespace DirsAccessFromExcel
             Excel excel = new Excel($"{AppDomain.CurrentDomain.BaseDirectory}ExcelSample\\ПраваДоступаОбразец.xlsx");
             try
             {
+                Console.WriteLine();
                 string rootDir = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта,\n" +
                     "например: \'Q:\\Проекты\\003-2022-ПИР\\\' и нажмите Enter").TrimStart().TrimEnd();
                 Console.WriteLine();
