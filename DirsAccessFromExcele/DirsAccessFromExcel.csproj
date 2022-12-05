@@ -56,10 +56,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <EmbeddedResource Include="ExcelSample\ПраваДоступаОбразец.xlsx">
+    <EmbeddedResource Include="README.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="README.txt">
+    <EmbeddedResource Include="ExcelSample\ПраваДоступаОбразец.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
