@@ -19,13 +19,17 @@ namespace DirsAccessFromExcel
                         var result = SetAccessByExcel();
                         if (result)
                         {
-                            Console.WriteLine("Готово, нажмите Enter");
+                            Console.WriteLine();
+                            Console.WriteLine(new string('=', 140));
+                            Console.WriteLine("Готово, нажмите Enter -->");
                         }
                         else
                         {
-                            Console.WriteLine("Выполнено с ошибками, нажмите Enter");
+                            Console.WriteLine();
+                            Console.WriteLine(new string('=', 140));
+                            Console.WriteLine("Выполнено с ошибками, нажмите Enter -->");
                         }
-                        Console.ReadLine();
+                        Console.ReadKey(true);
                         Console.Clear();
                         break;
                     case "обнулить":
