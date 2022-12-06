@@ -8,24 +8,50 @@ using _Excel = Microsoft.Office.Interop.Excel;
 
 namespace DirsAccessFromExcel.WorkWithExcel
 {
+    /// <summary>
+    /// Обработчик Excel файла с матрицей доступа
+    /// </summary>
     public class Excel : IDisposable
     {
-        public string Path { get; private set; }
+        /// <summary>
+        /// Приложение Excel
+        /// </summary>
         private readonly _Application excel = new _Excel.Application();
+
+        /// <summary>
+        /// Книга Excel с матрицей доступа
+        /// </summary>
         private readonly Workbook wb;
+
+        /// <summary>
+        /// Лист Excel с матрицей доступа
+        /// </summary>
         private readonly Worksheet ws;
 
-        private UsernameDto[] Users;
+        /// <summary>
+        /// Список Dto скомпонованных абсолютных путей к папкам и прав доступа для пользователей к ним
+        /// </summary>
+        private readonly List<UserDirAccessDto> ListOfUsersAccRules
+            = new List<UserDirAccessDto>();
 
-        private readonly List<List<UserDirAccessDto>> ListOfUsersAccRules
-            = new List<List<UserDirAccessDto>>();
 
+        /// <summary>
+        /// Файл Excel с матрицей прав доступа
+        /// </summary>
+        /// <param name="Path"></param>
         public Excel(string Path)
         {
             this.Path = Path;
             wb = excel.Workbooks.Open(Path);
             ws = wb.Worksheets[1];
         }
+
+
+        /// <summary>
+        /// Полный путь к Excel файлу
+        /// </summary>
+        public string Path { get; private set; }
+
 
         /// <summary>
         /// Возвращает значение ячейки по номеру строки и столбца. Индексация начинается с 1!
@@ -40,65 +66,19 @@ namespace DirsAccessFromExcel.WorkWithExcel
         }
 
         /// <summary>
-        /// Заполняет массив <see cref="Users">Users</see> валидными dto имен пользователей
+        /// Назначает права доступа к директориям из <see cref="ListOfUsersAccRules">ListOfUsersAccRules</see>
         /// </summary>
-        private void FillUsernames()
-        {
-            var column = 2;
-            var row = 3;
-            List<UsernameDto> users = new List<UsernameDto>();
-            var cellValue = ReadCell(row, column);
-            while (cellValue != String.Empty)
-            {
-                string[] usersInCell = AccessSetter.GetUsernamesFromString(cellValue);
-                foreach (string user in usersInCell)
-                {
-                    users.Add(new UsernameDto(user, column));
-                }
-                column++;
-                cellValue = ReadCell(row, column);
-            }
-            Users = users.ToArray();
-        }
-
-        private void FillRulesList(string @rootDir)
-        {
-            FillUsernames();
-            foreach (var user in Users)
-            {
-                List<UserDirAccessDto> userAccRules = new List<UserDirAccessDto>();
-                var row = 4;
-                var columnNumber = 1;
-                var columnUser = user.ColumnNumber;
-                var path = ReadCell(row, columnNumber);
-                var accRule = ReadCell(row, columnUser);
-                while ((path != String.Empty) || (accRule != String.Empty))
-                {
-                    if (path != String.Empty && accRule != string.Empty)
-                    {
-                        path = rootDir + path;
-                        var rule = AccessSetter.GetAccessRule(accRule);
-                        userAccRules.Add(new UserDirAccessDto(path, user.Name, rule));
-                    }
-                    row++;
-                    path = ReadCell(row, columnNumber);
-                    accRule = ReadCell(row, columnUser);
-                }
-                ListOfUsersAccRules.Add(userAccRules);
-            }
-        }
-
+        /// <param name="root"></param>
+        /// <returns></returns>
         public bool SetAccRulesToDirs(string @root)
         {
             FillRulesList(@root);
+            Console.WriteLine();
+            Console.WriteLine(new string('=', 140));
             bool result = true;
             foreach (var accListForUser in ListOfUsersAccRules)
             {
-                for (int i = 0; i < accListForUser.Count; i++)
-                {
-                    result &= AccessSetter.SetDirAccessForUser(accListForUser[i]);
-                }
-                Console.WriteLine();
+                result &= AccessSetter.SetDirAccessForUser(accListForUser);
             }
             return result;
         }
@@ -107,6 +87,62 @@ namespace DirsAccessFromExcel.WorkWithExcel
         {
             wb.Close(0);
             excel.Quit();
+        }
+
+
+        /// <summary>
+        /// Заполняет сисок <see cref="ListOfUsersAccRules">ListOfUsersAccRules</see>
+        /// </summary>
+        /// <param name="rootDir">Корневая папка проекта</param>
+        private void FillRulesList(string @rootDir)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Подождите, идет обработка матрицы доступа...");
+            FillRulesForRoot(rootDir);
+            int row = 4;
+            int columnDir = 1;
+            int columnUser = 2;
+            string path = ReadCell(row, columnDir);
+            while (!string.IsNullOrEmpty(path))
+            {
+                string[] users = AccessSetter.GetUsernamesFromString(ReadCell(3, columnUser));
+                while (users.Length > 0)
+                {
+                    string accRule = ReadCell(row, columnUser);
+                    if (!string.IsNullOrEmpty(accRule))
+                    {
+                        var rule = AccessSetter.GetAccessRule(accRule);
+                        foreach (string user in users)
+                        {
+                            ListOfUsersAccRules.Add(new UserDirAccessDto(rootDir + path, user, rule));
+                        }
+                    }
+                    columnUser++;
+                    users = AccessSetter.GetUsernamesFromString(ReadCell(3, columnUser));
+                }
+                row++;
+                columnUser = 2;
+                path = ReadCell(row, columnDir);
+            }
+        }
+
+        /// <summary>
+        /// Назначает доступ для чтения только корневой папки проекта для всех пользователей из Excel
+        /// </summary>
+        /// <param name="root">Полный путь к корню проекта</param>
+        private void FillRulesForRoot(string @root)
+        {
+            int columnUser = 2;
+            string[] users = AccessSetter.GetUsernamesFromString(ReadCell(3, columnUser));
+            while (users.Length > 0)
+            {
+                foreach (string user in users)
+                {
+                    ListOfUsersAccRules.Add(new UserDirAccessDto(@root, user, UserAccessRule.Read));
+                }
+                columnUser++;
+                users = AccessSetter.GetUsernamesFromString(ReadCell(3, columnUser));
+            }
         }
     }
 }

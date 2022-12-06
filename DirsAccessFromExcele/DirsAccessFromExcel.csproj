@@ -46,19 +46,19 @@
     <Compile Include="DTO\DirectoryInfoExtension.cs" />
     <Compile Include="DTO\UserDirAccessDto.cs" />
     <Compile Include="DTO\UsernameDto.cs" />
-    <Compile Include="Extensions\ConsoleExtensions.cs" />
     <Compile Include="Extensions\UserInput.cs" />
     <Compile Include="Logic\AccessSetter.cs" />
+    <Compile Include="Logic\UserAccessRule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkWithExcel\Excel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <EmbeddedResource Include="ExcelSample\ПраваДоступаОбразец.xlsx">
+    <EmbeddedResource Include="README.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="README.txt">
+    <EmbeddedResource Include="ExcelSample\ПраваДоступаОбразец.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

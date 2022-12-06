@@ -8,8 +8,10 @@ namespace DirsAccessFromExcel
 {
     public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            Console.WindowHeight = 50;
+            Console.WindowWidth = 150;
             var input = GetAction();
             while (input != "выход")
             {
@@ -19,13 +21,17 @@ namespace DirsAccessFromExcel
                         var result = SetAccessByExcel();
                         if (result)
                         {
-                            Console.WriteLine("Готово, нажмите Enter");
+                            Console.WriteLine();
+                            Console.WriteLine(new string('=', 140));
+                            Console.WriteLine("Готово, нажмите Enter -->");
                         }
                         else
                         {
-                            Console.WriteLine("Выполнено с ошибками, нажмите Enter");
+                            Console.WriteLine();
+                            Console.WriteLine(new string('=', 140));
+                            Console.WriteLine("Выполнено с ошибками, нажмите Enter -->");
                         }
-                        Console.ReadLine();
+                        Console.ReadKey(true);
                         Console.Clear();
                         break;
                     case "обнулить":
@@ -49,15 +55,10 @@ namespace DirsAccessFromExcel
             }
         }
 
-        private static string GetAction()
-        {
-            return UserInput.GetStringFromUser(
-                "Если вы хотите назначить права доступа к папкам проекта введите \'назначить\';" +
-                "\nесли вы хотите обнулить доступ для пользователя к папкам проекта введите \'обнулить\';" +
-                "\nдля выхода введите \'выход\'." +
-                "\nРегистр не важен.").TrimStart().TrimEnd().ToLower();
-        }
-
+        /// <summary>
+        /// Выполнить команду запрещения доступа для пользователя ко всем папкам проекта
+        /// </summary>
+        /// <returns>True, если команда выполнена успешно, иначе false</returns>
         public static bool DisableAccessForUser()
         {
             string userRaw = UserInput.GetStringFromUser("Введите имя пользователя для запрета доступа," +
@@ -68,11 +69,16 @@ namespace DirsAccessFromExcel
             return AccessSetter.RemoveUserAccess(dir, userRaw);
         }
 
+        /// <summary>
+        /// Выполнить команду назначения прав доступа по таблице Excel
+        /// </summary>
+        /// <returns></returns>
         public static bool SetAccessByExcel()
         {
             Excel excel = new Excel($"{AppDomain.CurrentDomain.BaseDirectory}ExcelSample\\ПраваДоступаОбразец.xlsx");
             try
             {
+                Console.WriteLine();
                 string rootDir = UserInput.GetStringFromUser("Введите полный путь к корневой папке проекта,\n" +
                     "например: \'Q:\\Проекты\\003-2022-ПИР\\\' и нажмите Enter").TrimStart().TrimEnd();
                 Console.WriteLine();
@@ -92,6 +98,20 @@ namespace DirsAccessFromExcel
             {
                 excel.Dispose();
             }
+        }
+
+
+        /// <summary>
+        /// Получить строку команды от пользователя
+        /// </summary>
+        /// <returns></returns>
+        private static string GetAction()
+        {
+            return UserInput.GetStringFromUser(
+                "Если вы хотите назначить права доступа к папкам проекта введите \'назначить\';" +
+                "\nесли вы хотите обнулить доступ для пользователя к папкам проекта введите \'обнулить\';" +
+                "\nдля выхода введите \'выход\'." +
+                "\nРегистр не важен.").TrimStart().TrimEnd().ToLower();
         }
     }
 }

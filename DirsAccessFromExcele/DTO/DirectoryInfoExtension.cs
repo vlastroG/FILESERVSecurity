@@ -4,6 +4,9 @@ using System.IO;
 
 namespace DirsAccessFromExcel.DTO
 {
+    /// <summary>
+    /// Методы расширения для DirectoryInfo
+    /// </summary>
     public static class DirectoryInfoExtension
     {
         /// <summary>
@@ -26,6 +29,12 @@ namespace DirsAccessFromExcel.DTO
             }
         }
 
+        /// <summary>
+        /// Заполняет список путей ко всем подкаталогам из корневой папки в порядке от внешней к внутренней,
+        /// порядок подпапок верхнего уровня не соблюдается.
+        /// </summary>
+        /// <param name="root">Корневой каталог</param>
+        /// <param name="pathList">Список путей к папкам</param>
         private static void FillSubdirsListRecurs(DirectoryInfo root, ref List<string> pathList)
         {
             DirectoryInfo[] subDirs = null;
