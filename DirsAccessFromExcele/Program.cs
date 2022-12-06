@@ -10,6 +10,8 @@ namespace DirsAccessFromExcel
     {
         static void Main(string[] args)
         {
+            Console.WindowHeight = 50;
+            Console.WindowWidth = 150;
             var input = GetAction();
             while (input != "выход")
             {
