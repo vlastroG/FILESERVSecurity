@@ -8,14 +8,31 @@ using _Excel = Microsoft.Office.Interop.Excel;
 
 namespace DirsAccessFromExcel.WorkWithExcel
 {
+    /// <summary>
+    /// Обработчик Excel файла с матрицей доступа
+    /// </summary>
     public class Excel : IDisposable
     {
+        /// <summary>
+        /// Полный путь к Excel файлу
+        /// </summary>
         public string Path { get; private set; }
+
+        /// <summary>
+        /// Приложение Excel
+        /// </summary>
         private readonly _Application excel = new _Excel.Application();
+
+        /// <summary>
+        /// Книга Excel с матрицей доступа
+        /// </summary>
         private readonly Workbook wb;
+
+        /// <summary>
+        /// Лист Excel с матрицей доступа
+        /// </summary>
         private readonly Worksheet ws;
 
-        private UsernameDto[] Users;
 
         /// <summary>
         /// Список Dto скомпонованных абсолютных путей к папкам и прав доступа для пользователей к ним
@@ -46,27 +63,6 @@ namespace DirsAccessFromExcel.WorkWithExcel
             return ws.Cells[row, column].Value2 ?? String.Empty;
         }
 
-        /// <summary>
-        /// Заполняет массив <see cref="Users">Users</see> валидными dto имен пользователей
-        /// </summary>
-        private void FillUsernames()
-        {
-            var column = 2;
-            var row = 3;
-            List<UsernameDto> users = new List<UsernameDto>();
-            var cellValue = ReadCell(row, column);
-            while (cellValue != String.Empty)
-            {
-                string[] usersInCell = AccessSetter.GetUsernamesFromString(cellValue);
-                foreach (string user in usersInCell)
-                {
-                    users.Add(new UsernameDto(user, column));
-                }
-                column++;
-                cellValue = ReadCell(row, column);
-            }
-            Users = users.ToArray();
-        }
 
         /// <summary>
         /// Заполняет сисок <see cref="ListOfUsersAccRules">ListOfUsersAccRules</see>

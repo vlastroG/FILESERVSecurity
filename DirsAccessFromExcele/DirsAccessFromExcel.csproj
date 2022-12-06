@@ -46,7 +46,6 @@
     <Compile Include="DTO\DirectoryInfoExtension.cs" />
     <Compile Include="DTO\UserDirAccessDto.cs" />
     <Compile Include="DTO\UsernameDto.cs" />
-    <Compile Include="Extensions\ConsoleExtensions.cs" />
     <Compile Include="Extensions\UserInput.cs" />
     <Compile Include="Logic\AccessSetter.cs" />
     <Compile Include="Logic\UserAccessRule.cs" />

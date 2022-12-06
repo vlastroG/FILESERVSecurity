@@ -53,6 +53,10 @@ namespace DirsAccessFromExcel
             }
         }
 
+        /// <summary>
+        /// Получить строку команды от пользователя
+        /// </summary>
+        /// <returns></returns>
         private static string GetAction()
         {
             return UserInput.GetStringFromUser(
@@ -62,6 +66,10 @@ namespace DirsAccessFromExcel
                 "\nРегистр не важен.").TrimStart().TrimEnd().ToLower();
         }
 
+        /// <summary>
+        /// Выполнить команду запрещения доступа для пользователя ко всем папкам проекта
+        /// </summary>
+        /// <returns>True, если команда выполнена успешно, иначе false</returns>
         public static bool DisableAccessForUser()
         {
             string userRaw = UserInput.GetStringFromUser("Введите имя пользователя для запрета доступа," +
@@ -72,6 +80,10 @@ namespace DirsAccessFromExcel
             return AccessSetter.RemoveUserAccess(dir, userRaw);
         }
 
+        /// <summary>
+        /// Выполнить команду назначения прав доступа по таблице Excel
+        /// </summary>
+        /// <returns></returns>
         public static bool SetAccessByExcel()
         {
             Excel excel = new Excel($"{AppDomain.CurrentDomain.BaseDirectory}ExcelSample\\ПраваДоступаОбразец.xlsx");
