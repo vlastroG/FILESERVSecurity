@@ -8,7 +8,7 @@ namespace DirsAccessFromExcel
 {
     public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.WindowHeight = 50;
             Console.WindowWidth = 150;
@@ -56,19 +56,6 @@ namespace DirsAccessFromExcel
         }
 
         /// <summary>
-        /// Получить строку команды от пользователя
-        /// </summary>
-        /// <returns></returns>
-        private static string GetAction()
-        {
-            return UserInput.GetStringFromUser(
-                "Если вы хотите назначить права доступа к папкам проекта введите \'назначить\';" +
-                "\nесли вы хотите обнулить доступ для пользователя к папкам проекта введите \'обнулить\';" +
-                "\nдля выхода введите \'выход\'." +
-                "\nРегистр не важен.").TrimStart().TrimEnd().ToLower();
-        }
-
-        /// <summary>
         /// Выполнить команду запрещения доступа для пользователя ко всем папкам проекта
         /// </summary>
         /// <returns>True, если команда выполнена успешно, иначе false</returns>
@@ -111,6 +98,20 @@ namespace DirsAccessFromExcel
             {
                 excel.Dispose();
             }
+        }
+
+
+        /// <summary>
+        /// Получить строку команды от пользователя
+        /// </summary>
+        /// <returns></returns>
+        private static string GetAction()
+        {
+            return UserInput.GetStringFromUser(
+                "Если вы хотите назначить права доступа к папкам проекта введите \'назначить\';" +
+                "\nесли вы хотите обнулить доступ для пользователя к папкам проекта введите \'обнулить\';" +
+                "\nдля выхода введите \'выход\'." +
+                "\nРегистр не важен.").TrimStart().TrimEnd().ToLower();
         }
     }
 }

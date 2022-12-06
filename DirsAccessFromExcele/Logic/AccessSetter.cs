@@ -124,6 +124,7 @@ namespace DirsAccessFromExcel.Logic
             }
         }
 
+
         /// <summary>
         /// Удаляет доступ пользователя к заданной директории и всем ее подпапкам
         /// </summary>
@@ -191,7 +192,6 @@ namespace DirsAccessFromExcel.Logic
         {
             Console.WriteLine($"Ошибка: папки {DirPath} не существует !");
         }
-
 
         /// <summary>
         /// Назначает разрешение заданного действия к заданной директории

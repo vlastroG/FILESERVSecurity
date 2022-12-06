@@ -13,31 +13,14 @@ namespace DirsAccessFromExcel.DTO
         private readonly string _path;
 
         /// <summary>
-        /// Абсолютный путь к папке
-        /// </summary>
-        public string @DirPath { get => _path; }
-
-
-        /// <summary>
         /// Имя пользователя (ivanov.ii)
         /// </summary>
         private readonly string _user;
 
         /// <summary>
-        /// Имя пользователя (ivanov.ii)
-        /// </summary>
-        public string @UserName { get => _user; }
-
-
-        /// <summary>
         /// Уровень доступа к папке
         /// </summary>
         private readonly UserAccessRule _rule;
-
-        /// <summary>
-        /// Уровень доступа к папке
-        /// </summary>
-        public UserAccessRule Access { get => _rule; }
 
 
         /// <summary>
@@ -52,5 +35,21 @@ namespace DirsAccessFromExcel.DTO
             _user = UserName;
             _rule = Access;
         }
+
+
+        /// <summary>
+        /// Абсолютный путь к папке
+        /// </summary>
+        public string @DirPath { get => _path; }
+
+        /// <summary>
+        /// Имя пользователя (ivanov.ii)
+        /// </summary>
+        public string @UserName { get => _user; }
+
+        /// <summary>
+        /// Уровень доступа к папке
+        /// </summary>
+        public UserAccessRule Access { get => _rule; }
     }
 }

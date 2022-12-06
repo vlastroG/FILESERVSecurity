@@ -11,20 +11,10 @@
         private readonly string _name;
 
         /// <summary>
-        /// Имя пользователя с доменным префиксом (PGS.ru\ivanov.aa)
-        /// </summary>
-        public string @Name { get => _name; }
-
-
-        /// <summary>
         /// Номер столбца, в котором написано имя пользователя, индексация столбцов начинается с 1.
         /// </summary>
         private readonly int _column;
 
-        /// <summary>
-        /// Номер столбца, в котором написано имя пользователя, индексация столбцов начинается с 1.
-        /// </summary>
-        public int ColumnNumber { get => _column; }
 
         /// <summary>
         /// Конструктор Dto имени пользователя и номера столюца из Excel
@@ -36,5 +26,16 @@
             _name = @"PGS.ru\" + name;
             _column = columnNumber;
         }
+
+
+        /// <summary>
+        /// Имя пользователя с доменным префиксом (PGS.ru\ivanov.aa)
+        /// </summary>
+        public string @Name { get => _name; }
+
+        /// <summary>
+        /// Номер столбца, в котором написано имя пользователя, индексация столбцов начинается с 1.
+        /// </summary>
+        public int ColumnNumber { get => _column; }
     }
 }

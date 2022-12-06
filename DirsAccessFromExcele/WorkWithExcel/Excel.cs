@@ -14,11 +14,6 @@ namespace DirsAccessFromExcel.WorkWithExcel
     public class Excel : IDisposable
     {
         /// <summary>
-        /// Полный путь к Excel файлу
-        /// </summary>
-        public string Path { get; private set; }
-
-        /// <summary>
         /// Приложение Excel
         /// </summary>
         private readonly _Application excel = new _Excel.Application();
@@ -33,12 +28,12 @@ namespace DirsAccessFromExcel.WorkWithExcel
         /// </summary>
         private readonly Worksheet ws;
 
-
         /// <summary>
         /// Список Dto скомпонованных абсолютных путей к папкам и прав доступа для пользователей к ним
         /// </summary>
         private readonly List<UserDirAccessDto> ListOfUsersAccRules
             = new List<UserDirAccessDto>();
+
 
         /// <summary>
         /// Файл Excel с матрицей прав доступа
@@ -51,6 +46,13 @@ namespace DirsAccessFromExcel.WorkWithExcel
             ws = wb.Worksheets[1];
         }
 
+
+        /// <summary>
+        /// Полный путь к Excel файлу
+        /// </summary>
+        public string Path { get; private set; }
+
+
         /// <summary>
         /// Возвращает значение ячейки по номеру строки и столбца. Индексация начинается с 1!
         /// Допускается использовать вместо индекса столбца его название.
@@ -61,6 +63,28 @@ namespace DirsAccessFromExcel.WorkWithExcel
         public string ReadCell(int row, object column)
         {
             return ws.Cells[row, column].Value2 ?? String.Empty;
+        }
+
+        /// <summary>
+        /// Назначает права доступа к директориям из <see cref="ListOfUsersAccRules">ListOfUsersAccRules</see>
+        /// </summary>
+        /// <param name="root"></param>
+        /// <returns></returns>
+        public bool SetAccRulesToDirs(string @root)
+        {
+            FillRulesList(@root);
+            bool result = true;
+            foreach (var accListForUser in ListOfUsersAccRules)
+            {
+                result &= AccessSetter.SetDirAccessForUser(accListForUser);
+            }
+            return result;
+        }
+
+        public void Dispose()
+        {
+            wb.Close(0);
+            excel.Quit();
         }
 
 
@@ -97,28 +121,6 @@ namespace DirsAccessFromExcel.WorkWithExcel
                 columnUser = 2;
                 path = ReadCell(row, columnDir);
             }
-        }
-
-        /// <summary>
-        /// Назначает права доступа к директориям из <see cref="ListOfUsersAccRules">ListOfUsersAccRules</see>
-        /// </summary>
-        /// <param name="root"></param>
-        /// <returns></returns>
-        public bool SetAccRulesToDirs(string @root)
-        {
-            FillRulesList(@root);
-            bool result = true;
-            foreach (var accListForUser in ListOfUsersAccRules)
-            {
-                result &= AccessSetter.SetDirAccessForUser(accListForUser);
-            }
-            return result;
-        }
-
-        public void Dispose()
-        {
-            wb.Close(0);
-            excel.Quit();
         }
     }
 }
