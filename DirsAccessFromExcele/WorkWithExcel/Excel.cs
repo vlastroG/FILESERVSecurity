@@ -73,6 +73,8 @@ namespace DirsAccessFromExcel.WorkWithExcel
         public bool SetAccRulesToDirs(string @root)
         {
             FillRulesList(@root);
+            Console.WriteLine();
+            Console.WriteLine(new string('=', 140));
             bool result = true;
             foreach (var accListForUser in ListOfUsersAccRules)
             {
@@ -96,6 +98,7 @@ namespace DirsAccessFromExcel.WorkWithExcel
         {
             Console.WriteLine();
             Console.WriteLine("Подождите, идет обработка матрицы доступа...");
+            FillRulesForRoot(rootDir);
             int row = 4;
             int columnDir = 1;
             int columnUser = 2;
@@ -120,6 +123,25 @@ namespace DirsAccessFromExcel.WorkWithExcel
                 row++;
                 columnUser = 2;
                 path = ReadCell(row, columnDir);
+            }
+        }
+
+        /// <summary>
+        /// Назначает доступ для чтения только корневой папки проекта для всех пользователей из Excel
+        /// </summary>
+        /// <param name="root">Полный путь к корню проекта</param>
+        private void FillRulesForRoot(string @root)
+        {
+            int columnUser = 2;
+            string[] users = AccessSetter.GetUsernamesFromString(ReadCell(3, columnUser));
+            while (users.Length > 0)
+            {
+                foreach (string user in users)
+                {
+                    ListOfUsersAccRules.Add(new UserDirAccessDto(@root, user, UserAccessRule.Read));
+                }
+                columnUser++;
+                users = AccessSetter.GetUsernamesFromString(ReadCell(3, columnUser));
             }
         }
     }
